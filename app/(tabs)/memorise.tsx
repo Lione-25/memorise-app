@@ -23,20 +23,22 @@ export default function MemoriseScreen() {
 
   return (
     <View style={styles.container}>
-      <Pdf
-        source={source}
-        page={currentPage}
-        style={styles.pdf}
-        horizontal={true}
-        enablePaging={true}
-        trustAllCerts={true}
-        onLoadComplete={(pages) => console.log(`Loaded ${pages} pages`)}
-        // onError={(error) => console.error("PDF error:", error)}
-        onError={(error) => {
-          console.log("PDF failed to load:", JSON.stringify(error, null, 2));
-        }}
-        onLoadProgress={(percent) => console.log(`Progress: ${percent}`)}
-      />
+      <View style={styles.pdfWrapper}>
+        <Pdf
+          source={source}
+          page={currentPage}
+          style={styles.pdf}
+          horizontal={true}
+          enablePaging={true}
+          trustAllCerts={true}
+          onLoadComplete={(pages) => console.log(`Loaded ${pages} pages`)}
+          // onError={(error) => console.error("PDF error:", error)}
+          onError={(error) => {
+            console.log("PDF failed to load:", JSON.stringify(error, null, 2));
+          }}
+          onLoadProgress={(percent) => console.log(`Progress: ${percent}`)}
+        />
+      </View>
       <TouchableOpacity style={styles.button} onPress={onTickPress}>
         <Text style={styles.buttonText}>✅ Completed</Text>
       </TouchableOpacity>
@@ -48,6 +50,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  pdfWrapper: {
+    flex: 1,
+    transform: [{ scaleX: -1 }], // Flip outer container
   },
   pdf: {
     flex: 1,
