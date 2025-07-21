@@ -1,19 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
   Alert,
+  Keyboard,
 } from "react-native";
 
 import Pdf from "react-native-pdf";
 
 export default function MemoriseScreen() {
-  const [pdfCurrentPage, setPdfCurrentPage] = useState(621); // ← Change this to the page number you want (1-indexed)
+  const [pdfCurrentPage, setPdfCurrentPage] = useState(621);
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingPage, setEditingPage] = useState(false);
+  const [inputPage, setInputPage] = useState("");
+
+  useEffect(() => {
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setEditingPage(false);
+      //   setInputPage("");
+    });
+
+    return () => {
+      hideSubscription.remove();
+    };
+  }, []);
 
   const onTickPress = () => {
     Alert.alert("✅ Page Completed", `You marked page ${currentPage} as done!`);
@@ -26,9 +41,35 @@ export default function MemoriseScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.pageNumber}>
-          Page {currentPage > 0 ? currentPage : "--"}
-        </Text>
+        <View>
+          {editingPage ? (
+            <TextInput
+              style={styles.pageInput}
+              value={inputPage}
+              onChangeText={setInputPage}
+              autoFocus
+              keyboardType="numeric"
+              onSubmitEditing={() => {
+                const num = parseInt(inputPage);
+                if (!isNaN(num) && num >= 1 && num <= 604) {
+                  setPdfCurrentPage(622 - num);
+                }
+                setEditingPage(false);
+                setInputPage("");
+              }}
+              onBlur={() => {
+                setEditingPage(false);
+                setInputPage("");
+              }}
+            />
+          ) : (
+            <TouchableOpacity onPress={() => setEditingPage(true)}>
+              <Text style={styles.pageNumber}>
+                Page {currentPage > 0 ? currentPage : "--"}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <Pdf
           source={source}
           page={pdfCurrentPage}
@@ -63,6 +104,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     fontWeight: "bold",
+  },
+  pageInput: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    borderBottomWidth: 1,
+    borderColor: "#999",
+    marginTop: 10,
+    padding: 2,
   },
   pdf: {
     flex: 1,
