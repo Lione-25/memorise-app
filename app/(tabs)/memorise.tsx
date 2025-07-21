@@ -17,7 +17,9 @@ export default function MemoriseScreen() {
     // Optional: Save to AsyncStorage or backend
   };
 
-  const source = require("../assets/almadinah-qadim.pdf");
+  //   const source = require("../assets/almadinah-qadim.pdf");
+  const source = { uri: "bundle-assets://almadinah-qadim.pdf" };
+  //   const source = { uri: "bundle-assets://trial.pdf" };
 
   return (
     <View style={styles.container}>
@@ -28,6 +30,12 @@ export default function MemoriseScreen() {
         horizontal={true}
         enablePaging={true}
         trustAllCerts={true}
+        onLoadComplete={(pages) => console.log(`Loaded ${pages} pages`)}
+        // onError={(error) => console.error("PDF error:", error)}
+        onError={(error) => {
+          console.log("PDF failed to load:", JSON.stringify(error, null, 2));
+        }}
+        onLoadProgress={(percent) => console.log(`Progress: ${percent}`)}
       />
       <TouchableOpacity style={styles.button} onPress={onTickPress}>
         <Text style={styles.buttonText}>✅ Completed</Text>
