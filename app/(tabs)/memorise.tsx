@@ -31,7 +31,10 @@ export default function MemoriseScreen() {
   }, []);
 
   const onTickPress = () => {
-    Alert.alert("✅ Page Completed", `You marked page ${currentPage} as done!`);
+    Alert.alert(
+      "✅ Page Completed",
+      `You marked page ${currentPage} as memorised!`
+    );
     // Optional: Save to AsyncStorage or backend
   };
 
@@ -88,7 +91,7 @@ export default function MemoriseScreen() {
         />
       </View>
       <TouchableOpacity style={styles.button} onPress={onTickPress}>
-        <Text style={styles.buttonText}>✅ Completed</Text>
+        <Text style={styles.buttonText}>✅ Memorised</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
