@@ -22,9 +22,6 @@ export default function MemoriseScreen() {
   const [editingPage, setEditingPage] = useState(false);
   const [inputPage, setInputPage] = useState("");
   const [isCovered, setIsCovered] = useState(false);
-  //   const [coverHeight] = useState(
-  //     new Animated.Value(Dimensions.get("window").height)
-  //   );
   const [coverTop] = useState(new Animated.Value(0)); // start at top of screen
 
   useEffect(() => {
@@ -40,30 +37,11 @@ export default function MemoriseScreen() {
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
-    // onPanResponderMove: (_, gestureState) => {
-    //   const newHeight = Dimensions.get("window").height - gestureState.dy;
-    //   if (newHeight >= 0 && newHeight <= Dimensions.get("window").height) {
-    //     coverHeight.setValue(newHeight);
-    //   }
-    // },
     onPanResponderMove: (_, gestureState) => {
       const newTop = Math.max(0, gestureState.dy); // drag down = increase top
       coverTop.setValue(newTop);
     },
   });
-
-  // ................or this.....................
-  //   const [coverHeight, setCoverHeight] = useState(Dimensions.get("window").height);
-  // const coverTranslateY = useSharedValue(0);
-
-  // const panGesture = Gesture.Pan()
-  //   .onUpdate((e) => {
-  //     const newHeight = Math.min(
-  //       Dimensions.get("window").height,
-  //       Math.max(0, coverHeight - e.translationY)
-  //     );
-  //     runOnJS(setCoverHeight)(newHeight);
-  //   });
 
   //..............................................
 
@@ -139,7 +117,6 @@ export default function MemoriseScreen() {
           <TouchableOpacity
             onPress={() => {
               setIsCovered(true);
-              //   coverHeight.setValue(Dimensions.get("window").height);
             }}
           >
             <Text style={{ color: "blue" }}>🧊 Cover Page</Text>
@@ -201,8 +178,6 @@ export default function MemoriseScreen() {
                 left: 0,
                 right: 0,
                 bottom: 0, // anchored to the bottom
-                // height: coverHeight,
-                // zIndex: 10,
                 width: "100%",
                 alignItems: "center",
                 justifyContent: "flex-start",
@@ -256,28 +231,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  //   box: {
-  //     height: 150,
-  //     width: 150,
-  //     backgroundColor: "blue",
-  //     borderRadius: 5,
-  //   },
-  //   coverOverlay: {
-  //     position: "absolute",
-  //     left: 0,
-  //     right: 0,
-  //     height: Dimensions.get("window").height - 200,
-  //     width: Dimensions.get("window").width,
-  //     backgroundColor: "white",
-  //     // zIndex: 10,
-  //   },
-
-  //   coverHandle: {
-  //     height: 40,
-  //     justifyContent: "center",
-  //     alignItems: "center",
-  //     backgroundColor: "#eee",
-  //     borderBottomWidth: 1,
-  //     borderColor: "#ccc",
-  //   },
 });
