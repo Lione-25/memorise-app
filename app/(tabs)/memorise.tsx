@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -9,6 +9,9 @@ import {
   Dimensions,
   Alert,
   Keyboard,
+  PanResponder,
+  Animated,
+  //   Easing,
 } from "react-native";
 
 import Pdf from "react-native-pdf";
@@ -18,6 +21,11 @@ export default function MemoriseScreen() {
   const [currentPage, setCurrentPage] = useState(1);
   const [editingPage, setEditingPage] = useState(false);
   const [inputPage, setInputPage] = useState("");
+  const [isCovered, setIsCovered] = useState(false);
+  //   const [coverHeight] = useState(
+  //     new Animated.Value(Dimensions.get("window").height)
+  //   );
+  const [coverTop] = useState(new Animated.Value(0)); // start at top of screen
 
   useEffect(() => {
     const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
@@ -29,6 +37,53 @@ export default function MemoriseScreen() {
       hideSubscription.remove();
     };
   }, []);
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    // onPanResponderMove: (_, gestureState) => {
+    //   const newHeight = Dimensions.get("window").height - gestureState.dy;
+    //   if (newHeight >= 0 && newHeight <= Dimensions.get("window").height) {
+    //     coverHeight.setValue(newHeight);
+    //   }
+    // },
+    onPanResponderMove: (_, gestureState) => {
+      const newTop = Math.max(0, gestureState.dy); // drag down = increase top
+      coverTop.setValue(newTop);
+    },
+  });
+
+  // ................or this.....................
+  //   const [coverHeight, setCoverHeight] = useState(Dimensions.get("window").height);
+  // const coverTranslateY = useSharedValue(0);
+
+  // const panGesture = Gesture.Pan()
+  //   .onUpdate((e) => {
+  //     const newHeight = Math.min(
+  //       Dimensions.get("window").height,
+  //       Math.max(0, coverHeight - e.translationY)
+  //     );
+  //     runOnJS(setCoverHeight)(newHeight);
+  //   });
+
+  //..............................................
+
+  //   const pan = useRef(new Animated.ValueXY()).current;
+
+  //   const panResponder = useRef(
+  //     PanResponder.create({
+  //       onMoveShouldSetPanResponder: () => true,
+  //       onPanResponderMove: Animated.event([
+  //         null,
+  //         {
+  //           // dx: pan.x,
+  //           dy: pan.y,
+  //         },
+  //       ]),
+  //       onPanResponderRelease: () => {
+  //         pan.extractOffset();
+  //       },
+  //     })
+  //   ).current;
 
   const onTickPress = () => {
     Alert.alert(
@@ -73,6 +128,31 @@ export default function MemoriseScreen() {
             </TouchableOpacity>
           )}
         </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-around",
+            marginBottom: 10,
+            zIndex: 10,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              setIsCovered(true);
+              //   coverHeight.setValue(Dimensions.get("window").height);
+            }}
+          >
+            <Text style={{ color: "blue" }}>🧊 Cover Page</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setIsCovered(false);
+            }}
+          >
+            <Text style={{ color: "blue" }}>🔓 Reveal Page</Text>
+          </TouchableOpacity>
+        </View>
         <Pdf
           source={source}
           page={pdfCurrentPage}
@@ -80,7 +160,10 @@ export default function MemoriseScreen() {
           horizontal={true}
           enablePaging={true}
           //   onPageChanged={() => console.log(currentPage)}
-          onPageChanged={(page) => setCurrentPage(622 - page)}
+          onPageChanged={(page) => {
+            setCurrentPage(622 - page);
+            setIsCovered(false);
+          }}
           trustAllCerts={true}
           onLoadComplete={(pages) => console.log(`Loaded ${pages} pages`)}
           // onError={(error) => console.error("PDF error:", error)}
@@ -89,6 +172,48 @@ export default function MemoriseScreen() {
           }}
           onLoadProgress={(percent) => console.log(`Progress: ${percent}`)}
         />
+        {isCovered && (
+          //   <Animated.View
+          //     style={{
+          //       transform: [
+          //         // { translateX: pan.x },
+          //         { translateY: pan.y },
+          //       ],
+          //     }}
+          //     {...panResponder.panHandlers}
+          //   >
+          //     <View
+          //       style={[
+          //         // StyleSheet.absoluteFillObject,
+          //         // ,
+          //         styles.coverOverlay,
+          //       ]}
+          //     />
+          //   </Animated.View>
+          <Animated.View
+            {...panResponder.panHandlers}
+            style={[
+              //   StyleSheet.absoluteFillObject,
+              {
+                backgroundColor: "#fff",
+                position: "absolute",
+                top: coverTop,
+                left: 0,
+                right: 0,
+                bottom: 0, // anchored to the bottom
+                // height: coverHeight,
+                // zIndex: 10,
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                borderTopWidth: 2,
+                borderColor: "#ccc",
+              },
+            ]}
+          >
+            <Text style={{ fontSize: 24, padding: 10 }}>⬇️</Text>
+          </Animated.View>
+        )}
       </View>
       <TouchableOpacity style={styles.button} onPress={onTickPress}>
         <Text style={styles.buttonText}>✅ Memorised</Text>
@@ -131,4 +256,28 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+  //   box: {
+  //     height: 150,
+  //     width: 150,
+  //     backgroundColor: "blue",
+  //     borderRadius: 5,
+  //   },
+  //   coverOverlay: {
+  //     position: "absolute",
+  //     left: 0,
+  //     right: 0,
+  //     height: Dimensions.get("window").height - 200,
+  //     width: Dimensions.get("window").width,
+  //     backgroundColor: "white",
+  //     // zIndex: 10,
+  //   },
+
+  //   coverHandle: {
+  //     height: 40,
+  //     justifyContent: "center",
+  //     alignItems: "center",
+  //     backgroundColor: "#eee",
+  //     borderBottomWidth: 1,
+  //     borderColor: "#ccc",
+  //   },
 });
